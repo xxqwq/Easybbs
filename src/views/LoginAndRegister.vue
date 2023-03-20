@@ -57,7 +57,7 @@
                 type="primary"
                 size="large"
                 class="send-mail-btn"
-                @click="showSendEmailCodeDialog"
+                @click="getEmailCode"
                 >获取验证码</el-button
               >
             </div>
@@ -68,7 +68,9 @@
                   2.在邮箱中头像-》设置-》反垃圾-》白名单-》设置邮件地址白名单
                 </p>
                 <p>3.[2021236373@qq.com】添加到白名单</p>
-                <a href="https://www.coderlx.cn/" target="_blank">不知道怎么设置？</a>
+                <a href="https://www.coderlx.cn/" target="_blank"
+                  >不知道怎么设置？</a
+                >
               </div>
               <template #reference>
                 <span class="a-link" :style="{ 'font-size': '14px' }"
@@ -165,12 +167,16 @@
               class="a-link"
               @click="showPanel(1)"
               v-if="opType === 2"
-              >去登陆</a
+              >去登录</a
             >
           </div>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="op-btn">登录</el-button>
+          <el-button type="primary" class="op-btn" @click="doSubmit"
+            ><span v-if="opType === 0">注册</span
+            ><span v-if="opType === 1">登录</span
+            ><span v-if="opType === 2">重置密码</span></el-button
+          >
         </el-form-item>
       </el-form>
     </Dialog>
@@ -193,7 +199,7 @@
           {{ formData.email }}
         </el-form-item>
         <el-form-item label="验证码" prop="checkCode">
-          <div :style="{'display':'flex'}">
+          <div :style="{ display: 'flex' }">
             <el-input
               size="large"
               clearable
@@ -225,6 +231,10 @@ const router = useRouter();
 const route = useRoute();
 const api = {
   checkCode: "/api/checkCode",
+  sendMailCode: "/sendEmailCode",
+  register: "/register",
+  login: "/login",
+  resetPwd: "/resetPwd",
 };
 //0:注册 1：登录 2：重置密码
 const opType = ref();
@@ -245,7 +255,7 @@ const dialogConfig4SendMailCode = reactive({
     },
   ],
 });
-const showSendEmailCodeDialog = () => {
+const getEmailCode = () => {
   formDataRef.value.validateField("email", (valid) => {
     if (!valid) {
       return;
@@ -263,11 +273,24 @@ const showSendEmailCodeDialog = () => {
 };
 //发送邮件
 const sendEmailCode = () => {
-  formData4SendMailCodeRef.value.validate("email", (valid) => {
+  formData4SendMailCodeRef.value.validate(async (valid) => {
     if (!valid) {
       return;
     } else {
-      console.log("请求后台发送验证码");
+      const params = Object.assign({}, formData4SendMailCode.value);
+      params.type = opType.value == 0 ? 0 : 1;
+      let result = await proxy.Request({
+        url: api.sendMailCode,
+        params: params,
+        errorCallback: () => {
+          changeCheckCode(1);
+        },
+      });
+      if (!result) {
+        return;
+      }
+      proxy.Message.success("验证码发送成功,请登录邮箱查看");
+      dialogConfig4SendMailCode.show = false;
     }
   });
 };
@@ -337,10 +360,10 @@ const checkCodeurl4SendMailCode = ref(api.checkCode);
 const changeCheckCode = (type) => {
   if (type == 0) {
     checkCodeurl.value =
-      api.checkCode + "?type" + type + "&time=" + new Date().getTime();
+      api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
   } else {
     checkCodeurl4SendMailCode.value =
-      api.checkCode + "?type" + type + "&time=" + new Date().getTime();
+      api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
   }
 };
 //密码显示隐藏
@@ -366,6 +389,55 @@ const resetForm = () => {
   nextTick(() => {
     changeCheckCode(0);
     formDataRef.value.resetFields();
+    formData.value = {};
+  });
+};
+//登录、注册、重置密码 提交表单
+const doSubmit = () => {
+  formDataRef.value.validate(async (valid) => {
+    if (!valid) {
+      return;
+    }
+    let params = {};
+    Object.assign(params, formData.value);
+    //注册
+    if (opType.value == 0 || opType.value == 2) {
+      params.password = params.registerPassword;
+      delete params.registerPassword;
+      delete params.registerPassword;
+    }
+    let url = null;
+    if (opType.value == 0) {
+      url = api.register;
+    } else if (opType.value == 1) {
+      url = api.login;
+    } else if (opType.value == 2) {
+      url = api.resetPwd;
+    }
+    let result = await proxy.Request({
+      url: url,
+      params: params,
+      errorCallback: () => {
+        changeCheckCode(0);
+      },
+    });
+
+    if (!result) {
+      return;
+    }
+    //注册返回
+    if (opType.value == 0) {
+      proxy.Message.success("注册成功，请返回登录窗口登录");
+      showPanel(1);
+    }
+    //登录
+    else if (opType.value == 1) {
+    }
+    //重置密码
+    else if (opType.value === 2) {
+      proxy.Message.success("重置密码成功，请返回登录窗口登录");
+      showPanel(1);
+    }
   });
 };
 defineExpose({ showPanel });

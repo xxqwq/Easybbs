@@ -12,6 +12,8 @@ import '@/assets/base.scss'
 import '@/assets/icon/iconfont.css'
 //全局方法
 import Verify from './utils/Verify'
+import Message from './utils/Message'
+import Request from '@/utils/Request'
 //全局组件
 import Dialog from '@/components/Dialog.vue'
 const app = createApp(App)
@@ -22,6 +24,8 @@ app.config.globalProperties.VueCookies = VueCookies;
 app.config.globalProperties.globalInfo = {
     bodyWidth: 1300,
 }
-app.config.globalProperties.Verify=Verify
+app.config.globalProperties.Verify = Verify
+app.config.globalProperties.Message = Message
+app.config.globalProperties.Request = Request
 
 app.mount('#app')
