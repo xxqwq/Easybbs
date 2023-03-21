@@ -42,6 +42,7 @@ instance.interceptors.response.use(
         if (responseData.code == 200) {
             return responseData;
         } else if (responseData.code == 901) {
+
             return Promise.reject({ showError: false, msg: "登录超时" });
         } else {
             if (errorCallback) {
@@ -49,13 +50,10 @@ instance.interceptors.response.use(
             }
             return Promise.reject({ showError: showError, msg: responseData.info });
         }
-
-
     }, (error) => {
         if (error.config.showLoading && loading) {
             loading.close();
         }
-        console.log("哈哈哈哈")
         return Promise.reject({ showError: true, msg: "网络异常" });
     }
 );

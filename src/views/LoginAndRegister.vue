@@ -79,12 +79,12 @@
               </template>
             </el-popover>
           </el-form-item>
-          <el-form-item prop="nickname" v-if="opType === 0">
+          <el-form-item prop="nickName" v-if="opType === 0">
             <el-input
               size="large"
               clearable
               placeholder="请输入昵称"
-              v-model="formData.nickname"
+              v-model="formData.nickName"
               maxLength="20"
             >
               <template #prefix>
@@ -103,11 +103,11 @@
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item prop="passwordAgain" required>
+          <el-form-item prop="reRegisterPassword" required>
             <el-input
               size="large"
               placeholder="请再次输入密码"
-              v-model="formData.passwordAgain"
+              v-model="formData.reRegisterPassword"
               show-password
             >
               <template #prefix>
@@ -225,10 +225,11 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
-
+import { useStore } from "vuex";
+import md5 from "js-md5";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
-const route = useRoute();
+const store = useStore();
 const api = {
   checkCode: "/api/checkCode",
   sendMailCode: "/sendEmailCode",
@@ -323,7 +324,7 @@ const rules = reactive({
   //     trigger: "change",
   //   },
   // ],
-  // passwordAgain: [
+  // reRegisterPassword: [
   //   {
   //     required: true,
   //     message: "请再次输入密码",
@@ -345,7 +346,7 @@ const rules = reactive({
       message: "密码只能是数字，字母，特殊字符 8-18位",
     },
   ],
-  passwordAgain: [
+  reRegisterPassword: [
     { required: true, message: "请再次输入密码" },
     {
       validator: checkRePassword,
@@ -390,6 +391,12 @@ const resetForm = () => {
     changeCheckCode(0);
     formDataRef.value.resetFields();
     formData.value = {};
+    if (opType.value === 1) {
+      const cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+      if (cookieLoginInfo) {
+        formData.value = cookieLoginInfo;
+      }
+    }
   });
 };
 //登录、注册、重置密码 提交表单
@@ -400,11 +407,22 @@ const doSubmit = () => {
     }
     let params = {};
     Object.assign(params, formData.value);
+
     //注册
     if (opType.value == 0 || opType.value == 2) {
       params.password = params.registerPassword;
       delete params.registerPassword;
-      delete params.registerPassword;
+      delete params.reRegisterPassword;
+    }
+
+    //登录
+    if (opType.value == 1) {
+      let cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+      let cookiePassword =
+        cookieLoginInfo == null ? null : cookieLoginInfo.password;
+      if (params.password !== cookiePassword) {
+        params.password = md5(params.password);
+      }
     }
     let url = null;
     if (opType.value == 0) {
@@ -422,6 +440,7 @@ const doSubmit = () => {
       },
     });
 
+
     if (!result) {
       return;
     }
@@ -432,6 +451,19 @@ const doSubmit = () => {
     }
     //登录
     else if (opType.value == 1) {
+      if (params.rememberMe) {
+        const loginInfo = {
+          email: params.email,
+          password: params.password,
+          rememberMe: params.rememberMe,
+        };
+        proxy.VueCookies.set("loginInfo", loginInfo, "7d");
+      } else {
+        proxy.VueCookies.remove("loginInfo");
+      }
+      dialogConfig.show = false;
+      proxy.Message.success("登录成功");
+      store.commit("updateLoginUserInfo", result.data);
     }
     //重置密码
     else if (opType.value === 2) {
