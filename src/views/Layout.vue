@@ -1,14 +1,13 @@
 <template>
   <div class="main">
     <Header />
-    <div :style="{ height: '1500px' }">
+    <div class="body-content">
       <router-view />
     </div>
     <!-- <Dialog :isShow="showDialog" :buttons="buttons" @close="showDialog = false"
       >
     </Dialog> -->
     <!-- 登录注册 -->
-
   </div>
 </template>
 
@@ -27,8 +26,11 @@ const buttons = [
     type: "primary",
   },
 ];
-
 </script>
 
 <style lang="scss">
+.body-content {
+  margin-top: 60px;
+  position: relative;
+}
 </style>

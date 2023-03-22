@@ -2,7 +2,10 @@ import { createStore } from "vuex"
 
 export default createStore({
     state: {
-        loginUserInfo: null
+        //用户信息
+        loginUserInfo: null,
+        //是否展示登录
+        showLogin: false,
     },
     getters: {
         getLoginUserInfo: (state) => {
@@ -12,6 +15,9 @@ export default createStore({
     mutations: {
         updateLoginUserInfo: (state, value) => {
             state.loginUserInfo = value
+        },
+        showLogin(state,value){
+            state.showLogin=value
         }
     },
     actions: {
