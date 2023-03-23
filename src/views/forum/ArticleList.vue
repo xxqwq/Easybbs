@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance } from "vue";
+import { ref, reactive, getCurrentInstance,watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import ArticleListItem from "./ArticleListItem.vue";
 const { proxy } = getCurrentInstance();
@@ -52,10 +52,14 @@ const api = {
   loadArticle: "/forum/loadArticle",
 };
 //文章列表
+//一级版块
+const pBoardId=ref(0)
+//二级版块
+const boardId=ref(0)
 const orderType = ref(0);
 const changeOrderType = (type) => {
   orderType.value = type;
-  loadArticle()
+  loadArticle();
 };
 
 const loading = ref(false);
@@ -64,7 +68,8 @@ const loadArticle = async () => {
   loading.value = true;
   let params = {
     pageNo: articleListInfo.value.pageNo,
-    boardId: 0,
+    boardId: boardId.value,
+    pBoardId:pBoardId.value,
     orderType: orderType.value,
   };
   let result = await proxy.Request({
@@ -79,6 +84,16 @@ const loadArticle = async () => {
   articleListInfo.value = result.data;
 };
 loadArticle();
+//监听路由变化
+watch(
+  () => route.params,
+  (newVal, oldVal) => {
+    pBoardId.value=newVal.pBoardId
+    boardId.value=newVal.boardId
+    loadArticle()
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -91,11 +106,11 @@ loadArticle();
       padding: 10px;
       font-size: 15px;
       border-bottom: 1px solid #ddd;
-      .tab{
+      .tab {
         cursor: pointer;
       }
-      .active{
-        color:var(--link)
+      .active {
+        color: var(--link);
       }
     }
     .article-list {

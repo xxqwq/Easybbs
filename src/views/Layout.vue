@@ -17,7 +17,7 @@ import { useRouter, useRoute } from "vue-router";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
-import Header from "@/components/Header.vue";
+import Header from "@/views/Header.vue";
 // import LoginAndRegister from "@/views/LoginAndRegister.vue";
 // import Dialog from "@/components/Dialog.vue";
 const buttons = [

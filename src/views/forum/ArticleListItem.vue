@@ -12,13 +12,13 @@
           <el-divider direction="vertical"></el-divider>
           <div class="address">·{{ data.userIpAddress }}</div>
           <el-divider direction="vertical"></el-divider>
-          <router-link :to="'/' + data.userId" class="link-info">{{
+          <router-link :to="'/user/' + data.userId" class="link-info">{{
             data.pBoardName
           }}</router-link>
 
           <template v-if="data.BoardId">
             <span>&nbsp;&nbsp;/&nbsp;&nbsp;</span>
-            <router-link :to="'/' + data.userId" lass="link-info">{{
+            <router-link :to="'/user/' + data.userId" class="link-info">{{
               data.boardName
             }}</router-link>
           </template>

@@ -15,7 +15,7 @@
       </router-link>
       <!-- 板块信息 -->
       <div class="menu-panel">
-        <span class="menu-item">全部</span>
+        <span class="menu-item" to="/">首页</span>
         <template v-for="board in boardList">
           <el-popover
             placement="bottom-start"
@@ -24,15 +24,22 @@
             v-if="board.children.length > 0"
           >
             <template #reference>
-              <span class="menu-item">{{ board.boardName }}</span>
+              <span class="menu-item" @click="boardClickHandler(board)">{{
+                board.boardName
+              }}</span>
             </template>
             <div class="sub-board-list">
-              <span class="sub-board" v-for="subBoard in board.children">{{
-                subBoard.boardName
-              }}</span>
+              <span
+                class="sub-board"
+                v-for="subBoard in board.children"
+                @click="subBoardClickHandler( subBoard)"
+                >{{ subBoard.boardName }}</span
+              >
             </div>
           </el-popover>
-          <span class="menu-item" v-else>{{ board.boardName }}</span>
+          <span class="menu-item" v-else @click="boardClickHandler(board)">{{
+            board.boardName
+          }}</span>
         </template>
       </div>
       <!-- 登录 注册 用户信息 -->
@@ -96,11 +103,10 @@
 <script setup>
 import { useStore } from "vuex";
 import { ref, reactive, getCurrentInstance, onMounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import LoginAndRegister from "@/views/LoginAndRegister.vue";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
-const route = useRoute();
 const store = useStore();
 const emit = defineEmits(["loginAndRegister"]);
 
@@ -226,11 +232,21 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+//板块切换
+//一级板块
+const boardClickHandler = (board) => {
+  router.push(`/forum/${board.boardId}`);
+};
+//二级板块
+const subBoardClickHandler = (subBoard) => {
+  router.push(`/forum/${subBoard.pBoardId}/${subBoard.boardId}`);
+};
 </script>
 
 <style lang="scss">
 .header {
-  top:0;
+  top: 0;
   z-index: 1000;
   width: 100%;
   position: fixed;
