@@ -37,9 +37,7 @@
           }}</span>
         </div>
       </div>
-      <div class="cover" v-if="data.cover">
-        <img :src="'/api/file/getImage/'+data.cover" />
-      </div>
+      <Cover :cover="data.cover" :width="100" v-if="data.cover"/>
     </div>
   </div>
 </template>

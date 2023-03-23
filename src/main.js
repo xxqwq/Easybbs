@@ -18,19 +18,26 @@ import Request from './utils/Request'
 //全局组件
 import Dialog from '@/components/Dialog.vue'
 import Avatar from '@/components/Avatar.vue'
+import Cover from '@/components/Cover.vue'
+import DataList from '@/components/DataList.vue'
+import NoData from '@/components/NoData.vue'
+
 const app = createApp(App)
 app.component("Dialog", Dialog)
 app.component("Avatar", Avatar)
+app.component("Cover", Cover)
+app.component("DataList", DataList)
+app.component("NoData", NoData)
 app.use(router)
 app.use(ElementPlus);
 app.use(store)
 app.config.globalProperties.VueCookies = VueCookies;
 app.config.globalProperties.globalInfo = {
     bodyWidth: 1300,
-    avatarUrl: "/api/file/getAvatar/"
+    avatarUrl: "/api/file/getAvatar/",
+    imageUrl: "/api/file/getImage/",
 }
 app.config.globalProperties.Verify = Verify
 app.config.globalProperties.Message = Message
 app.config.globalProperties.Request = Request
-
 app.mount('#app')
