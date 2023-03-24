@@ -12,18 +12,21 @@
           <el-divider direction="vertical"></el-divider>
           <div class="address">·{{ data.userIpAddress }}</div>
           <el-divider direction="vertical"></el-divider>
-          <router-link :to="'/user/' + data.userId" class="link-info">{{
+          <router-link :to="`/forum/${data.pBoardId}`" class="link-info">{{
             data.pBoardName
           }}</router-link>
 
-          <template v-if="data.BoardId">
+          <template v-if="data.boardId">
             <span>&nbsp;&nbsp;/&nbsp;&nbsp;</span>
-            <router-link :to="'/user/' + data.userId" class="link-info">{{
+            <router-link :to="`/forum/${data.pBoardId}/${data.boardId}`" class="link-info">{{
               data.boardName
             }}</router-link>
           </template>
         </div>
-        <router-link to="/" class="title">{{ data.title }}</router-link>
+        <router-link to="/" class="title"
+          ><span v-if="data.topType == 1" class="top">置顶</span>
+          <span>{{ data.title }}</span></router-link
+        >
         <div class="summary">{{ data.summary }}</div>
         <div class="article-info">
           <span class="iconfont icon-eye-solid">{{
@@ -37,7 +40,7 @@
           }}</span>
         </div>
       </div>
-      <Cover :cover="data.cover" :width="100" v-if="data.cover"/>
+      <Cover :cover="data.cover" :width="100" v-if="data.cover" />
     </div>
   </div>
 </template>
@@ -56,7 +59,7 @@ const props = defineProps({
   padding: 5px 10px 0 10px;
   .article-item-inner {
     border-bottom: 1px solid #ddd;
-    padding: 10px;
+    padding: 10px 0px;
     display: flex;
     .article-body {
       flex: 1;
@@ -85,6 +88,14 @@ const props = defineProps({
         color: #4a4a4a;
         margin: 10px 0px;
         display: inline-block;
+        .top {
+          font-size: 13px;
+          border-radius: 5px;
+          border: 1px solid var(--pink);
+          color: var(--pink);
+          padding: 0px 5px;
+          margin-right: 10px;
+        }
       }
       .summary {
         font-size: 14px;

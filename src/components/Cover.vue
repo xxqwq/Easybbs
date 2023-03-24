@@ -7,7 +7,7 @@
       :src="proxy.globalInfo.imageUrl + cover"
     >
     </el-image>
-    <img src="'@/assets/image/default-cover.png'" alt="">
+    <img src="@/assets/image/default-cover.png" alt="">
   </div>
 </template>
 
