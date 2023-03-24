@@ -15,6 +15,7 @@ import store from './store'
 import Verify from './utils/Verify'
 import Message from './utils/Message'
 import Request from './utils/Request'
+import Utils from './utils/Utils.js'
 //全局组件
 import Dialog from '@/components/Dialog.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -40,4 +41,6 @@ app.config.globalProperties.globalInfo = {
 app.config.globalProperties.Verify = Verify
 app.config.globalProperties.Message = Message
 app.config.globalProperties.Request = Request
+app.config.globalProperties.Utils = Utils
+
 app.mount('#app')
