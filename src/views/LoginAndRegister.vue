@@ -6,7 +6,7 @@
       :buttons="dialogConfig.buttons"
       width="400px"
       :showCancel="false"
-      @close="dialogConfig.show = false"
+      @close="closeDialog"
     >
       <el-form
         :model="formData"
@@ -472,6 +472,11 @@ const doSubmit = () => {
     }
   });
 };
+
+const closeDialog=()=>{
+  dialogConfig.show = false
+  store.commit("showLogin",false)
+}
 defineExpose({ showPanel });
 </script>
 

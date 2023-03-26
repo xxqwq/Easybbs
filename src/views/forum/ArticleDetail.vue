@@ -1,7 +1,7 @@
 <template>
   <div
     class="container-body article-detail-body"
-    :style="{ width: proxy.globalInfo.bodyWidth - 300 + 'px' }"
+    :style="{ width: proxy.globalInfo.bodyWidth + 'px' }"
     v-if="Object.keys(articleInfo).length > 0"
   >
     <div class="board-info">
@@ -68,32 +68,100 @@
             已下载{{ attachment.downloadCount }}次
           </div>
           <div class="download-btn item">
-            <el-button type="primary" size="small">下载</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              @click="downloadAttachment(attachment.fileId)"
+              >下载</el-button
+            >
           </div>
         </div>
       </div>
       <!-- 评论 -->
-      <div class="comment-panel" id="view-comment">
-        
+      <div class="comment-panel" id="view-comment"></div>
+    </div>
+    <!-- 左侧快捷操作 -->
+    <div class="quick-panel" :style="{ left: quickPanelLeft + 'px' }">
+      <!-- 点赞 -->
+      <el-badge
+        :value="articleInfo.goodCount"
+        type="info"
+        :hidden="!articleInfo.goodCount > 0"
+      ></el-badge>
+      <div class="quick-item" @click="doLikeHandler">
+        <span
+          :class="['iconfont', 'icon-good', haveLike ? 'have-like' : '']"
+        ></span>
       </div>
+      <!-- 评论 -->
+      <el-badge
+        :value="articleInfo.commentCount"
+        type="info"
+        :hidden="!articleInfo.commentCount > 0"
+      ></el-badge>
+      <div class="quick-item" @click="goToPostion('view-comment')">
+        <span class="iconfont icon-comment"></span>
+      </div>
+
+      <!-- 附件-->
+      <div class="quick-item" @click="goToPostion('view-attachment')">
+        <span class="iconfont icon-attachment"></span>
+      </div>
+      <!-- 图片预览 -->
+      <ImageViewer
+        ref="imageViewerRef"
+        :imageList="previewImgList"
+      ></ImageViewer>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, onMounted } from "vue";
+import hljs from "highlight.js";
+import { ref, reactive, getCurrentInstance, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
+const store = useStore();
 const api = {
   getArticleDetail: "/forum/getArticleDetail",
+  doLike: "/forum/doLike",
+  getUserDownloadInfo: "/forum/getUserDownloadInfo",
+  attachmentDownload: "/api/forum/attachmentDownload",
 };
 //文章详情
 const articleInfo = ref({});
+
 //附件
 const attachment = ref({});
+//是否已点赞
+const haveLike = ref(false);
+//点赞
+const doLikeHandler = async () => {
+  if (!store.getters.getLoginUserInfo) {
+    store.commit("showLogin", true);
+    return;
+  }
+  let result = await proxy.Request({
+    url: api.doLike,
+    params: {
+      articleId: articleInfo.value.articleId,
+    },
+  });
+  if (!result) {
+    return;
+  }
+  haveLike.value = !haveLike.value;
+  let goodCount = 1;
+  if (!haveLike.value) {
+    goodCount = -1;
+  }
+  articleInfo.value.goodCount += goodCount;
+};
+
 const getArticleDetail = async (articleId) => {
   let result = await proxy.Request({
     url: api.getArticleDetail,
@@ -106,11 +174,107 @@ const getArticleDetail = async (articleId) => {
   }
   articleInfo.value = result.data.forumArticle;
   attachment.value = result.data.attachment;
+  haveLike.value = result.data.haveLike;
+
+  //图片预览
+  imagePreview();
+  //代码高亮
+  highlightCode()
 };
 
 onMounted(() => {
   getArticleDetail(route.params.articleId);
 });
+//快捷操作
+const quickPanelLeft =
+  (window.innerWidth - proxy.globalInfo.bodyWidth) / 2 - 110;
+
+//跳转
+const goToPostion = (domId) => {
+  document.querySelector("#" + domId).scrollIntoView();
+};
+
+//下载附件
+const downloadAttachment = async (fileId) => {
+  const currentUserInfo = store.getters.getLoginUserInfo;
+  if (!store.getters.getLoginUserInfo) {
+    store.commit("showLogin", true);
+    return;
+  }
+  //0积分的情况
+  if (
+    attachment.value.integral == 0 ||
+    currentUserInfo.userId == articleInfo.userId
+  ) {
+    downloadDo(fileId);
+    return;
+  }
+  //获取用户下载信息
+  let result = await proxy.Request({
+    url: api.getUserDownloadInfo,
+    params: {
+      fileId: fileId,
+    },
+  });
+  if (!result) {
+    return;
+  }
+  //判断用户是否下载过
+  if (result.data.haveDownload) {
+    downloadDo(fileId);
+    return;
+  }
+  //判断用户积分是否够
+  if (result.data.userIntegral < attachment.value.integral) {
+    proxy.Message.warning("你的积分不够，无法下载");
+    return;
+  }
+
+  proxy.Confirm(
+    `你还有${result.data.userIntegral}积分，当前下载会扣除${attachment.value.integral},确定要下载吗?`,
+    () => {
+      downloadDo(fileId);
+    }
+  );
+
+  // if(result.data>attachment.value.integral||currentUserInfo.userId==articleInfo.userId){
+
+  // }
+};
+
+const downloadDo = (fileId) => {
+  document.location.href = api.attachmentDownload + "?fileId=" + fileId;
+  attachment.value.downloadCount += 1;
+};
+
+//文章图片列表
+const imageViewerRef = ref(null);
+const previewImgList = ref([]);
+const imagePreview = () => {
+  nextTick(() => {
+    const imageNodeList = document
+      .querySelector("#detail")
+      .querySelectorAll("img");
+    const imageList = [];
+    imageNodeList.forEach((item, index) => {
+      const src = item.getAttribute("src");
+      imageList.push(src);
+      item.addEventListener("click", () => {
+        imageViewerRef.value.show(index);
+      });
+    });
+    previewImgList.value = imageList;
+  });
+};
+//代码高亮
+const highlightCode = () => {
+  nextTick(() => {
+    let blocks = document.querySelectorAll("pre code");
+    blocks.forEach((item) => {
+      hljs.highlightBlock(item);
+    });
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -195,10 +359,39 @@ onMounted(() => {
           padding: 0px 5px;
         }
       }
-      .comment-panel{
+      .comment-panel {
         margin-top: 20px;
         background: #fff;
       }
+    }
+  }
+}
+
+.quick-panel {
+  position: absolute;
+  width: 50px;
+  top: 150px;
+  text-align: center;
+  .el-badge__content.is-fixed {
+    top: 5px;
+    right: 15px;
+  }
+  .quick-item {
+    display: flex;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: #fff;
+    margin-bottom: 30px;
+    cursor: pointer;
+    .iconfont {
+      font-size: 22px;
+      color: var(--text2);
+    }
+    .have-like {
+      color: red;
     }
   }
 }
