@@ -212,7 +212,7 @@ const downloadAttachment = async (fileId) => {
   //0积分的情况
   if (
     attachment.value.integral == 0 ||
-    currentUserInfo.userId == articleInfo.userId
+    currentUserInfo.userId == articleInfo.value.userId
   ) {
     downloadDo(fileId);
     return;
@@ -377,9 +377,9 @@ const highlightCode = () => {
 }
 
 .quick-panel {
-  position: absolute;
+  position: fixed;
   width: 50px;
-  top: 150px;
+  top: 200px;
   text-align: center;
   .el-badge__content.is-fixed {
     top: 5px;
