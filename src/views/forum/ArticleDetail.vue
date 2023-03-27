@@ -78,7 +78,13 @@
         </div>
       </div>
       <!-- 评论 -->
-      <div class="comment-panel" id="view-comment"></div>
+      <div class="comment-panel" id="view-comment">
+        <CommentList
+          :articleId="articleInfo.articleId"
+          :articleUserId="articleInfo.userId"
+          v-if="articleInfo.articleId"
+        />
+      </div>
     </div>
     <!-- 左侧快捷操作 -->
     <div class="quick-panel" :style="{ left: quickPanelLeft + 'px' }">
@@ -121,7 +127,7 @@ import hljs from "highlight.js";
 import { ref, reactive, getCurrentInstance, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
-
+import CommentList from "@/views/forum/CommentList.vue";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
@@ -176,10 +182,12 @@ const getArticleDetail = async (articleId) => {
   attachment.value = result.data.attachment;
   haveLike.value = result.data.haveLike;
 
+  store.commit("setactivePboardId", result.data.forumArticle.pBoardId);
+  store.commit("setActiveBoardId", result.data.forumArticle.boardId);
   //图片预览
   imagePreview();
   //代码高亮
-  highlightCode()
+  highlightCode();
 };
 
 onMounted(() => {
@@ -359,10 +367,11 @@ const highlightCode = () => {
           padding: 0px 5px;
         }
       }
-      .comment-panel {
-        margin-top: 20px;
-        background: #fff;
-      }
+    }
+    .comment-panel {
+      margin-top: 20px;
+      background: #fff;
+      padding: 20px;
     }
   }
 }
