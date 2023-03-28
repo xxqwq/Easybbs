@@ -21,7 +21,15 @@
               v-model="formData.content"
             ></el-input>
             <div class="insert-img" v-if="showInsertImg">
+              <div class="pre-img" v-if="commentImg">
+                <CommentImage :src="commentImg"></CommentImage>
+                <span
+                  class="iconfont icon-remove"
+                  @click="removeCommentImg"
+                ></span>
+              </div>
               <el-upload
+                v-else
                 name="file"
                 :show-file-list="false"
                 accept=".png,.PNG,.jpg,.JPG,.jpeg,.JPEG,.gif,.GIF,.bmp,.BMP"
@@ -40,7 +48,9 @@
 
 <script setup>
 import { ref, reactive, getCurrentInstance } from "vue";
+import CommentImage from "./CommentImage.vue";
 const { proxy } = getCurrentInstance();
+
 const api = {
   postComment: "/comment/postComment",
 };
@@ -73,12 +83,25 @@ const formDataRef = ref();
 const rules = {
   content: [
     { required: true, message: "请输入评论内容" },
-    { min: 5, message: "评论至少5个字" },
   ],
 };
 // 选择图片
-const selectImg = () => {};
-
+const commentImg = ref(null);
+const selectImg = (file) => {
+  file = file.file;
+  let img = new FileReader();
+  img.readAsDataURL(file);
+  img.onload = ({ target }) => {
+    let imgData = target.result;
+    commentImg.value = imgData;
+    formData.value.image = file;
+  };
+};
+//删除图片
+const removeCommentImg = () => {
+  commentImg.value = null;
+  formData.value.image = null;
+};
 const emit = defineEmits(["postCommentFinish"]);
 //发表评论
 const postCommentDo = () => {
@@ -92,7 +115,7 @@ const postCommentDo = () => {
     params.replyUserId = props.replyUserId;
     let result = await proxy.Request({
       url: api.postComment,
-      params:params
+      params: params,
     });
     if (!result) {
       return;
@@ -120,6 +143,17 @@ const postCommentDo = () => {
         .iconfont {
           margin-top: 3px;
           font-size: 20px;
+        }
+        .pre-img {
+          margin-top: 10px;
+          position: relative;
+          .iconfont {
+            cursor: pointer;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            color: rgb(121, 121, 121);
+          }
         }
       }
     }

@@ -11,7 +11,15 @@
         >
       </div>
       <div class="comment-content">
-        <span v-html="commentData.content"></span>
+        <div v-html="commentData.content"></div>
+        <CommentImage
+          :style="{marginTop:'10px'}"
+          v-if="commentData.imgPath"
+          :src="
+            proxy.globalInfo.imageUrl + commentData.imgPath.replace('.', '_.')
+          "
+          :imgList="[proxy.globalInfo.imageUrl + commentData.imgPath]"
+        />
       </div>
       <div class="op-panel">
         <div class="time">
@@ -109,6 +117,7 @@
 <script setup>
 import { defineEmits, ref, getCurrentInstance } from "vue";
 import CommentPost from "./CommentPost.vue";
+import CommentImage from "./CommentImage.vue";
 import { useRouter } from "vue-router";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
