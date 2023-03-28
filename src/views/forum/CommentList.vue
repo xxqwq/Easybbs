@@ -3,12 +3,20 @@
     <div class="comment-title">
       <div class="title">
         评论
-        <span class="count">0</span>
+        <span class="count">{{ commentListInfo.totalCount }}</span>
       </div>
       <div class="tab">
-        <span>热榜</span>
+        <span
+          @click="orderChange(0)"
+          :class="['tab-item', orderType == 0 ? 'active' : '']"
+          >热榜</span
+        >
         <el-divider direction="vertical"></el-divider>
-        <span>最新</span>
+        <span
+          @click="orderChange(1)"
+          :class="['tab-item', orderType == 1 ? 'active' : '']"
+          >最新</span
+        >
       </div>
     </div>
     <!-- 发送评论 -->
@@ -27,14 +35,16 @@
         :dataSource="commentListInfo"
         :loading="loading"
         @loadData="loadComment"
+        noDataMsg="暂无评论，赶紧占沙发吧！"
       >
-        <template #default="{data}">
+        <template #default="{ data }">
           <CommentListItem
             :articleId="articleId"
             :commentData="data"
             :articleUserId="articleUserId"
             :currentUserId="currentUserInfo.userId"
             @hiddenAllReply="hiddenAllReplyHandler"
+            @reloadData="loadComment"
           />
         </template>
       </DataList>
@@ -59,9 +69,6 @@ const props = defineProps({
 });
 const api = {
   loadComment: "/comment/loadComment",
-  postComment: "/comment/postComment",
-  doLike: "/comment/doLike",
-  changeTopType: "/comment/changeTopType",
 };
 
 //用户信息
@@ -76,7 +83,10 @@ watch(
 
 //排序
 const orderType = ref(0);
-
+const orderChange = (type) => {
+  orderType.value = type;
+  loadComment();
+};
 //评论列表
 const loading = ref(null);
 const commentListInfo = ref({});
@@ -89,7 +99,8 @@ const loadComment = async () => {
   loading.value = true;
   let result = await proxy.Request({
     url: api.loadComment,
-    params: params,
+    showLoading: false,
+    params,
   });
   loading.value = false;
   if (!result) {
@@ -109,7 +120,12 @@ const hiddenAllReplyHandler = () => {
 //发布评论
 const postCommentFinish = (resultData) => {
   commentListInfo.value.list.unshift(resultData);
+  //更新数量
+  const totalCount = commentListInfo.value.totalCount + 1;
+  commentListInfo.value.totalCount = totalCount;
+  emit("updateCommentCount", totalCount);
 };
+const emit = defineEmits(["updateCommentCount"]);
 </script>
 
 <style lang="scss" scoped>
@@ -122,6 +138,14 @@ const postCommentFinish = (resultData) => {
       .count {
         font-size: 14px;
         padding: 0px 10px;
+      }
+    }
+    .tab {
+      .tab-item {
+        cursor: pointer;
+      }
+      .active {
+        color: var(--link);
       }
     }
   }

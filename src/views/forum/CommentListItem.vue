@@ -11,9 +11,15 @@
         >
       </div>
       <div class="comment-content">
-        <div v-html="commentData.content"></div>
+        <div>
+          <span class="tag tag-topping" v-if="commentData.topType == 1"
+            >置顶</span
+          >
+          <span class="tag no-audit" v-if="commentData.status==0">待审核</span>
+          <span v-html="commentData.content"></span>
+        </div>
         <CommentImage
-          :style="{marginTop:'10px'}"
+          :style="{ marginTop: '10px' }"
           v-if="commentData.imgPath"
           :src="
             proxy.globalInfo.imageUrl + commentData.imgPath.replace('.', '_.')
@@ -121,6 +127,7 @@ import CommentImage from "./CommentImage.vue";
 import { useRouter } from "vue-router";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
+
 const props = defineProps({
   articleId: {
     type: String,
@@ -139,7 +146,7 @@ const api = {
   doLike: "/comment/doLike",
   changeTopType: "/comment/changeTopType",
 };
-const emits = defineEmits(["hiddenAllReply"]);
+const emits = defineEmits(["hiddenAllReply", "reloadData"]);
 //显示回复框
 const showReplyPanel = (curData, type) => {
   const haveShow =
@@ -185,6 +192,20 @@ const doLike = async (data) => {
   data.goodCount = result.data.goodCount;
   data.likeType = result.data.likeType;
 };
+// 置顶
+const opTop = async (data) => {
+  let result = await proxy.Request({
+    url: api.changeTopType,
+    params: {
+      commentId: data.commentId,
+      topType: data.topType == 1 ? 0 : 1,
+    },
+  });
+  if (!result) {
+    return;
+  }
+  emits("reloadData");
+};
 </script>
 
 <style lang="scss" scoped>
@@ -208,12 +229,27 @@ const doLike = async (data) => {
         color: #fff;
         font-size: 12px;
         border-radius: 2px;
+        padding: 0px 3px;
       }
     }
     .comment-content {
       margin-top: 5px;
       font-size: 15px;
       line-height: 22px;
+      .tag {
+        font-size: 12px;
+        border-radius: 3px;
+        padding: 0px 5px;
+        margin-right: 5px;
+      }
+      .tag-topping {
+        color: var(--pink);
+        border: 1px solid var(--pink);
+      }
+      .no-audit {
+        color: var(--text2);
+        border: 1px solid var(--text2);
+      }
     }
     .op-panel {
       display: flex;

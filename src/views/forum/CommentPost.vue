@@ -78,13 +78,22 @@ const props = defineProps({
     default: "请文明发言，做一个棒棒的程序员",
   },
 });
+const checkPostComment = (rule, value, callback) => {
+  if (value == null && formData.value.image == null) {
+    callback(new Error(rule.message));
+  } else {
+    callback();
+  }
+};  
 const formData = ref({});
 const formDataRef = ref();
 const rules = {
   content: [
-    { required: true, message: "请输入评论内容" },
+    { required: true, message: "请输入评论内容", validator: checkPostComment },
+    { min: 3, message: "评论至少 3个字" },
   ],
 };
+
 // 选择图片
 const commentImg = ref(null);
 const selectImg = (file) => {
@@ -115,13 +124,14 @@ const postCommentDo = () => {
     params.replyUserId = props.replyUserId;
     let result = await proxy.Request({
       url: api.postComment,
-      params: params,
+      params:params,
     });
     if (!result) {
       return;
     }
     proxy.Message.success("评论发表成功");
     formDataRef.value.resetFields();
+    removeCommentImg()
     emit("postCommentFinish", result.data);
   });
 };
