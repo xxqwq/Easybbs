@@ -61,7 +61,7 @@ instance.interceptors.response.use(
 );
 
 
-const request = (config) => {
+const Request = (config) => {
     const { url, params, dataType, showLoading = true, errorCallback, showError = true } = config
     let contentType = contentTypeForm;
     let fromData = new FormData();
@@ -88,4 +88,4 @@ const request = (config) => {
     })
 }
 
-export default request;
+export default Request;

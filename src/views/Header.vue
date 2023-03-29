@@ -64,7 +64,7 @@
       <!-- 登录 注册 用户信息 -->
       <div class="user-info-panel">
         <div class="op-btn">
-          <el-button type="primary" class="op-btn">
+          <el-button type="primary" class="op-btn" @click="newPost">
             发帖<span class="iconfont icon-add"></span>
           </el-button>
           <el-button type="primary" class="op-btn">
@@ -118,7 +118,7 @@
 
 <script setup>
 import { useStore } from "vuex";
-import { ref, reactive, getCurrentInstance, onMounted, watch } from "vue";
+import { ref, reactive, getCurrentInstance, onMounted, watch,defineEmits } from "vue";
 import { useRouter } from "vue-router";
 import LoginAndRegister from "@/views/LoginAndRegister.vue";
 const { proxy } = getCurrentInstance();
@@ -282,6 +282,15 @@ watch(
     deep: true,
   }
 );
+
+//发帖
+const newPost=()=>{
+  if(!store.getters.getLoginUserInfo){
+    loginAndRegister(1)
+  }else{
+    router.push("/newPost")
+  }
+}
 </script>
 
 <style lang="scss">

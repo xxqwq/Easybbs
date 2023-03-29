@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance } from "vue";
+import { ref, reactive, getCurrentInstance,defineEmits } from "vue";
 import CommentImage from "./CommentImage.vue";
 const { proxy } = getCurrentInstance();
 
