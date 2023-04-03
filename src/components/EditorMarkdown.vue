@@ -21,7 +21,7 @@ import "@kangc/v-md-editor/lib/theme/style/github.css";
 // highlightjs
 import hljs from "highlight.js";
 
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance,defineEmits } from "vue";
 const { proxy } = getCurrentInstance();
 
 VMdEditor.use(githubTheme, {
