@@ -14,7 +14,7 @@
           <template v-else>
             <img
               :src="
-                (imageUlrPrefix ? imageUlrPrefix : proxy.globalInfo.imageUrl) +
+                (imageUrlPrefix ? imageUrlPrefix : proxy.globalInfo.imageUrl) +
                 modelValue.imageUrl
               "
               v-if="modelValue && modelValue.imageUrl"
@@ -34,7 +34,7 @@
   const route = useRoute();
   
   const props = defineProps({
-    imageUlrPrefix: {
+    imageUrlPrefix: {
       type: String,
     },
     modelValue: {

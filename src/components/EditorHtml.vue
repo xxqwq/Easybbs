@@ -19,7 +19,7 @@
 
 <script setup>
 import "@wangeditor/editor/dist/css/style.css"; // 引入 css
-import { onBeforeUnmount, ref, shallowRef,getCurrentInstance } from "vue";
+import { onBeforeUnmount, ref, shallowRef,getCurrentInstance,defineEmits } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { useStore } from "vuex";
 const store = useStore();

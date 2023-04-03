@@ -51,7 +51,7 @@ const props = defineProps({
   },
   top: {
     type: String,
-    default: "50px",
+    default: "30px",
   },
   buttons: {
     type: Array,
@@ -79,7 +79,7 @@ const close = function () {
     border-bottom: 1px solid #ddd;
     padding: 15px;
     min-height: 100px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 190px);
     overflow: auto;
   }
   .dialog-footer {

@@ -91,10 +91,10 @@
           </div>
           <div class="user-info">
             <el-dropdown>
-              <Avatar :userId="userInfo?.userId" :width="50" />
+              <Avatar :userId="userInfo?.userId" :width="50" :addLink="false" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item>个人主页</el-dropdown-item>
+                  <el-dropdown-item >个人主页</el-dropdown-item>
                   <el-dropdown-item>退出</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -118,7 +118,14 @@
 
 <script setup>
 import { useStore } from "vuex";
-import { ref, reactive, getCurrentInstance, onMounted, watch,defineEmits } from "vue";
+import {
+  ref,
+  reactive,
+  getCurrentInstance,
+  onMounted,
+  watch,
+  defineEmits,
+} from "vue";
 import { useRouter } from "vue-router";
 import LoginAndRegister from "@/views/LoginAndRegister.vue";
 const { proxy } = getCurrentInstance();
@@ -284,13 +291,13 @@ watch(
 );
 
 //发帖
-const newPost=()=>{
-  if(!store.getters.getLoginUserInfo){
-    loginAndRegister(1)
-  }else{
-    router.push("/newPost")
+const newPost = () => {
+  if (!store.getters.getLoginUserInfo) {
+    loginAndRegister(1);
+  } else {
+    router.push("/newPost");
   }
-}
+};
 </script>
 
 <style lang="scss">

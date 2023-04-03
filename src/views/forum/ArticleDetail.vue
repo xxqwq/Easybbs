@@ -582,6 +582,7 @@ watch(
       .active {
         border-left: 2px solid #6ca1f7;
         border-radius: 0px 3px 3px 0px;
+        background: #eeeded;
       }
     }
   }

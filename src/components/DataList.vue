@@ -1,9 +1,9 @@
 <template>
-  <div class="dataList">
+  <div>
     <div
-      v-if="!loading && dataSource.list !== null && dataSource.list.length == 0"
+      v-if="!loading && dataSource.list != null && dataSource.list.length == 0"
     >
-      <NoData :msg="noDataMsg" />
+      <NoData :msg="noDataMsg"></NoData>
     </div>
     <div class="skeleton" v-if="loading">
       <el-skeleton :row="2" animated></el-skeleton>
@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-import {defineEmits} from 'vue'
 const props = defineProps({
   dataSource: {
     type: Object,
@@ -48,13 +47,11 @@ const handlePageNoChange = (pageNo) => {
 };
 </script>
 
-<style lang="scss" scoped>
-.dataList {
-  .pagination {
-    padding: 5px 0px 10px 10px;
-  }
-  .skeleton {
-    padding: 15px;
-  }
+<style lang="scss">
+.pagination {
+  padding: 10px 0px 10px 10px;
+}
+.skeleton {
+  padding: 15px;
 }
 </style>

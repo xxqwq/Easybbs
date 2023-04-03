@@ -46,7 +46,7 @@ const props = defineProps({
 
 const goToUcenter = () => {
   if (props.addLink) {
-    router.push("/user" + proxy.userId);
+    router.push("/user/" + proxy.userId);
   }
 };
 </script>
