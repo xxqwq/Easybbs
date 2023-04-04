@@ -47,7 +47,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance,defineEmits } from "vue";
+import {
+  ref,
+  getCurrentInstance,
+  defineEmits,
+} from "vue";
 import CommentImage from "./CommentImage.vue";
 const { proxy } = getCurrentInstance();
 
@@ -84,7 +88,7 @@ const checkPostComment = (rule, value, callback) => {
   } else {
     callback();
   }
-};  
+};
 const formData = ref({});
 const formDataRef = ref();
 const rules = {
@@ -124,14 +128,14 @@ const postCommentDo = () => {
     params.replyUserId = props.replyUserId;
     let result = await proxy.Request({
       url: api.postComment,
-      params:params,
+      params: params,
     });
     if (!result) {
       return;
     }
     proxy.Message.success("评论发表成功");
     formDataRef.value.resetFields();
-    removeCommentImg()
+    removeCommentImg();
     emit("postCommentFinish", result.data);
   });
 };

@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from "vue";
+import { ref, reactive,defineEmits, getCurrentInstance, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 const { proxy } = getCurrentInstance();
 const router = useRouter();

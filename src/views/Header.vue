@@ -75,16 +75,77 @@
         <template v-if="userInfo?.userId">
           <div class="message-info">
             <el-dropdown>
-              <el-badge :value="12" class="item">
+              <el-badge
+                :value="messageCountInfo.total"
+                class="item"
+                :hidden="
+                  messageCountInfo.total == null || messageCountInfo.total == 0
+                "
+              >
                 <div class="iconfont icon-message"></div>
               </el-badge>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item>回复我的</el-dropdown-item>
-                  <el-dropdown-item>赞了我的文章</el-dropdown-item>
-                  <el-dropdown-item>赞了我的评论 </el-dropdown-item>
-                  <el-dropdown-item>下载了我的附件</el-dropdown-item>
-                  <el-dropdown-item>系统消息</el-dropdown-item>
+                  <el-dropdown-item
+                    @click="gotoMessage('reply')"
+                    class="message-item"
+                    ><span class="text">回复我的</span>
+                    <span class="count-tag" v-if="messageCountInfo.reply > 0">{{
+                      messageCountInfo.reply > 99
+                        ? "99+"
+                        : messageCountInfo.reply
+                    }}</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    @click="gotoMessage('likePost')"
+                    class="message-item"
+                    ><span class="text">赞了我的文章</span>
+                    <span
+                      class="count-tag"
+                      v-if="messageCountInfo.likePost > 0"
+                      >{{
+                        messageCountInfo.likePost > 99
+                          ? "99+"
+                          : messageCountInfo.likePost
+                      }}</span
+                    ></el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    @click="gotoMessage('likeComment')"
+                    class="message-item"
+                    ><span class="text">赞了我的评论</span>
+                    <span
+                      class="count-tag"
+                      v-if="messageCountInfo.likeComment > 0"
+                      >{{
+                        messageCountInfo.likeComment > 99
+                          ? "99+"
+                          : messageCountInfo.likeComment
+                      }}</span
+                    >
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    @click="gotoMessage('downloadAttachment')"
+                    class="message-item"
+                    ><span class="text">下载了我的附件</span>
+                    <span
+                      class="count-tag"
+                      v-if="messageCountInfo.downloadAttachment > 0"
+                      >{{
+                        messageCountInfo.downloadAttachment > 99
+                          ? "99+"
+                          : messageCountInfo.downloadAttachment
+                      }}</span
+                    ></el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    @click="gotoMessage('sys')"
+                    class="message-item"
+                    ><span class="text">系统消息</span>
+                    <span class="count-tag" v-if="messageCountInfo.sys > 0">{{
+                      messageCountInfo.sys > 99 ? "99+" : messageCountInfo.sys
+                    }}</span></el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -94,8 +155,10 @@
               <Avatar :userId="userInfo?.userId" :width="50" :addLink="false" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item >个人主页</el-dropdown-item>
-                  <el-dropdown-item>退出</el-dropdown-item>
+                  <el-dropdown-item @click="gotoUcenter(userInfo.userId)"
+                    >个人主页</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -139,6 +202,7 @@ const api = {
   loadMessageCount: "/ucenter/getMessageCount",
   logout: "/logout",
   getSysSetting: "/getSysSetting",
+  loadMessageCount: "/ucenter/getMessageCount",
 };
 const logoInfo = ref([
   {
@@ -298,6 +362,56 @@ const newPost = () => {
     router.push("/newPost");
   }
 };
+
+const gotoUcenter = (userId) => {
+  router.push(`/user/${userId}`);
+};
+//消息相关
+const gotoMessage = (type) => {
+  router.push(`/user/message/${type}`);
+};
+
+const messageCountInfo = ref({});
+const loadMessageCount = async () => {
+  let result = await proxy.Request({
+    url: api.loadMessageCount,
+  });
+  if (!result) {
+    return;
+  }
+  messageCountInfo.value = result.data;
+  store.commit("updateMessageCountInfo", result.data);
+};
+
+watch(
+  () => store.state.messageCountInfo,
+  (newVal, oldVal) => {
+    messageCountInfo.value = newVal || {};
+  },
+  { immediate: true, deep: true }
+);
+
+watch(
+  () => store.state.loginUserInfo,
+  (newVal, oldVal) => {
+    if (newVal) {
+      loadMessageCount();
+    }
+  },
+  { immediate: true, deep: true }
+);
+//退出
+const logout = () => {
+  proxy.Confirm("确定要退出吗?", async () => {
+    let result = await proxy.Request({
+      url: api.logout,
+    });
+    if (!result) {
+      return;
+    }
+    store.commit("updateLoginUserInfo", null);
+  });
+};
 </script>
 
 <style lang="scss">
@@ -384,6 +498,25 @@ const newPost = () => {
   }
   .active:hover {
     color: #fff;
+  }
+}
+.message-item {
+  display: flex;
+  justify-content: space-around;
+  .text {
+    flex: 1;
+  }
+  .count-tag {
+    height: 15px;
+    line-height: 15px;
+    min-width: 20px;
+    display: inline-block;
+    background: #f56c6c;
+    border-radius: 10px;
+    font-size: 13px;
+    text-align: center;
+    color: #fff;
+    margin-left: 10px;
   }
 }
 </style>
